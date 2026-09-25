@@ -3,10 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HealthBadge from './HealthBadge';
 import NotificationBell from './NotificationBell';
-import { Sprout, LogOut, User as UserIcon, LayoutDashboard, LogIn, UserPlus, Package, Store, ShoppingBag, Inbox, Warehouse, Truck, ShieldCheck } from 'lucide-react';
-
-
-
+import { Sprout, LogOut, LayoutDashboard, LogIn, UserPlus, Store } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -18,30 +15,19 @@ export default function Navbar() {
     navigate('/login');
   };
 
-  const getRoleColor = (role) => {
-    switch (role) {
-      case 'FARMER': return 'bg-emerald-950 text-emerald-300 border-emerald-800';
-      case 'BUYER': return 'bg-teal-950 text-teal-300 border-teal-800';
-      case 'TRANSPORTER': return 'bg-indigo-950 text-indigo-300 border-indigo-800';
-      case 'WAREHOUSE_MANAGER': return 'bg-amber-950 text-amber-300 border-amber-800';
-      case 'ADMIN': return 'bg-purple-950 text-purple-300 border-purple-800';
-      default: return 'bg-slate-800 text-slate-300 border-slate-700';
-    }
-  };
-
   return (
-    <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-50">
+    <header className="border-b border-[#DDE8DF] bg-white/95 backdrop-blur-md sticky top-0 z-50 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="p-2 bg-emerald-600 rounded-xl text-white shadow-lg shadow-emerald-600/30 group-hover:scale-105 transition-transform">
-              <Sprout className="w-6 h-6" />
+            <div className="p-2 bg-[#075B2A] rounded-xl text-white shadow-sm group-hover:scale-105 transition-transform">
+              <Sprout className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent">
+              <h1 className="text-lg font-bold tracking-tight text-[#123524] leading-none">
                 AgriChain
               </h1>
-              <p className="text-3xs text-slate-400 tracking-wide uppercase">Supply Chain Platform</p>
+              <p className="text-[10px] text-[#66756B] tracking-wide uppercase mt-0.5">Supply Chain Ecosystem</p>
             </div>
           </Link>
 
@@ -49,11 +35,11 @@ export default function Navbar() {
             to="/marketplace"
             className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
               location.pathname === '/marketplace'
-                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/80'
-                : 'text-slate-300 hover:text-white'
+                ? 'bg-[#EAF5EC] text-[#075B2A] border border-[#DDE8DF]'
+                : 'text-[#66756B] hover:text-[#123524] hover:bg-[#F5F8F3]'
             }`}
           >
-            <Store className="w-4 h-4 text-emerald-400" />
+            <Store className="w-4 h-4 text-[#075B2A]" />
             Marketplace
           </Link>
         </div>
@@ -69,82 +55,15 @@ export default function Navbar() {
 
               <Link
                 to="/dashboard"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#075B2A] hover:bg-[#0B7A36] text-white text-xs font-semibold shadow-sm transition-all"
               >
-                <LayoutDashboard className="w-4 h-4 text-emerald-400" />
-                Dashboard
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                <span>Dashboard</span>
               </Link>
-
-              {user.role === 'ADMIN' && (
-                <Link
-                  to="/admin/analytics"
-                  className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 border border-purple-800/80 text-purple-300 text-xs font-semibold transition-colors"
-                >
-                  <ShieldCheck className="w-4 h-4 text-purple-400" />
-                  Admin Portal
-                </Link>
-              )}
-
-
-              {user.role === 'FARMER' && (
-                <>
-                  <Link
-                    to="/farmer/crops"
-                    className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-800/80 text-emerald-300 text-xs font-semibold transition-colors"
-                  >
-                    <Package className="w-4 h-4 text-emerald-400" />
-                    My Crops
-                  </Link>
-                  <Link
-                    to="/farmer/orders"
-                    className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/80 text-indigo-300 text-xs font-semibold transition-colors"
-                  >
-                    <Inbox className="w-4 h-4 text-indigo-400" />
-                    Incoming Orders
-                  </Link>
-                </>
-              )}
-
-              {user.role === 'BUYER' && (
-                <Link
-                  to="/orders/mine"
-                  className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-950/60 hover:bg-teal-900/60 border border-teal-800/80 text-teal-300 text-xs font-semibold transition-colors"
-                >
-                  <ShoppingBag className="w-4 h-4 text-teal-400" />
-                  My Orders
-                </Link>
-              )}
-
-              {(user.role === 'WAREHOUSE_MANAGER' || user.role === 'ADMIN') && (
-                <Link
-                  to="/warehouse/facilities"
-                  className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-950/60 hover:bg-amber-900/60 border border-amber-800/80 text-amber-300 text-xs font-semibold transition-colors"
-                >
-                  <Warehouse className="w-4 h-4 text-amber-400" />
-                  Warehouse Storage
-                </Link>
-              )}
-
-              {(user.role === 'TRANSPORTER' || user.role === 'ADMIN') && (
-                <Link
-                  to="/transporter/shipments"
-                  className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-800/80 text-indigo-300 text-xs font-semibold transition-colors"
-                >
-                  <Truck className="w-4 h-4 text-indigo-400" />
-                  Logistics & Shipments
-                </Link>
-              )}
-
-
-
-              <div className={`hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full border text-xs font-semibold ${getRoleColor(user.role)}`}>
-                <UserIcon className="w-3.5 h-3.5" />
-                <span>{user.full_name} ({user.role})</span>
-              </div>
 
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg bg-slate-800 hover:bg-rose-950/60 hover:text-rose-400 text-slate-400 transition-colors"
+                className="p-2 rounded-xl bg-[#F5F8F3] hover:bg-rose-50 hover:text-rose-600 text-[#66756B] border border-[#DDE8DF] transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />
@@ -154,17 +73,17 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Link
                 to="/login"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#123524] hover:text-[#075B2A] bg-[#F5F8F3] hover:bg-white border border-[#DDE8DF] rounded-xl transition-all"
               >
-                <LogIn className="w-4 h-4 text-slate-400" />
-                Sign In
+                <LogIn className="w-3.5 h-3.5 text-[#075B2A]" />
+                <span>Sign In</span>
               </Link>
               <Link
                 to="/register"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-md shadow-emerald-600/20 transition-all hover:scale-[1.02]"
+                className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold bg-[#075B2A] hover:bg-[#0B7A36] text-white rounded-xl shadow-sm transition-all hover:scale-[1.01]"
               >
-                <UserPlus className="w-4 h-4" />
-                Register
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Register</span>
               </Link>
             </div>
           )}

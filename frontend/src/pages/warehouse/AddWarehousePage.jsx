@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import AppLayout from '../../components/AppLayout';
 import { createWarehouse } from '../../api/warehouses';
-import { Warehouse, MapPin, HardDrive, ArrowLeft, AlertCircle, PlusCircle } from 'lucide-react';
+import { Warehouse, MapPin, HardDrive, ArrowLeft, AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 
 const AddWarehousePage = () => {
   const navigate = useNavigate();
@@ -44,39 +43,41 @@ const AddWarehousePage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
-      <Navbar />
-
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
+    <AppLayout
+      title="Register Storage Facility"
+      subtitle="Expand cold storage and grain inventory capacity across agricultural supply corridors"
+      breadcrumb="Warehouse Management / New Facility"
+    >
+      <div className="max-w-2xl mx-auto space-y-6">
         <Link 
           to="/warehouse/facilities" 
-          className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-emerald-400 transition mb-6"
+          className="inline-flex items-center text-xs font-bold text-[#66756B] hover:text-[#075B2A] transition"
         >
           <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Storage Facilities
         </Link>
 
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
-          <div className="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-800">
-            <div className="p-3 bg-emerald-600/20 text-emerald-400 rounded-2xl border border-emerald-500/30">
+        <div className="bg-white border border-[#DDE8DF] rounded-3xl p-7 sm:p-9 shadow-soft">
+          <div className="flex items-center space-x-3.5 mb-6 pb-5 border-b border-[#DDE8DF]">
+            <div className="p-3 bg-[#EAF5EC] text-[#075B2A] rounded-2xl border border-[#DDE8DF]">
               <Warehouse className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-100">Register New Warehouse Storage Facility</h1>
-              <p className="text-xs text-slate-400">Add a new agricultural storage hub to manage crop inventory & logistics</p>
+              <h1 className="text-xl font-bold text-[#123524]">Facility Specifications</h1>
+              <p className="text-xs text-[#66756B]">Register storage parameters and available tonnage</p>
             </div>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-rose-950/60 border border-rose-800 text-rose-300 rounded-2xl text-xs flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
-              <span>{error}</span>
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
+              <span className="font-medium">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center">
-                <Warehouse className="w-3.5 h-3.5 mr-1.5 text-emerald-400" /> Facility Name
+              <label className="block text-xs font-bold text-[#123524] mb-2 flex items-center">
+                <Warehouse className="w-3.5 h-3.5 mr-1.5 text-[#075B2A]" /> Facility Hub Name
               </label>
               <input
                 type="text"
@@ -84,14 +85,14 @@ const AddWarehousePage = () => {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="e.g. Central Punjab Agro Cold Storage Hub"
-                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                placeholder="e.g. Central Punjab Cold Storage Hub"
+                className="w-full px-4 py-3 bg-[#F7FAF5] border border-[#DDE8DF] rounded-xl text-sm text-[#123524] focus:ring-2 focus:ring-[#075B2A] focus:border-[#075B2A] outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center">
-                <MapPin className="w-3.5 h-3.5 mr-1.5 text-emerald-400" /> Location / Region
+              <label className="block text-xs font-bold text-[#123524] mb-2 flex items-center">
+                <MapPin className="w-3.5 h-3.5 mr-1.5 text-[#075B2A]" /> Location / Agricultural District
               </label>
               <input
                 type="text"
@@ -99,14 +100,14 @@ const AddWarehousePage = () => {
                 required
                 value={formData.location}
                 onChange={handleChange}
-                placeholder="e.g. Ludhiana Sector 14, Punjab"
-                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+                placeholder="e.g. Ludhiana Mandi Road, Punjab"
+                className="w-full px-4 py-3 bg-[#F7FAF5] border border-[#DDE8DF] rounded-xl text-sm text-[#123524] focus:ring-2 focus:ring-[#075B2A] focus:border-[#075B2A] outline-none"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center">
-                <HardDrive className="w-3.5 h-3.5 mr-1.5 text-emerald-400" /> Total Storage Capacity (in Metric Tons)
+              <label className="block text-xs font-bold text-[#123524] mb-2 flex items-center">
+                <HardDrive className="w-3.5 h-3.5 mr-1.5 text-[#075B2A]" /> Total Storage Capacity (Metric Tons)
               </label>
               <input
                 type="number"
@@ -117,7 +118,7 @@ const AddWarehousePage = () => {
                 value={formData.total_capacity_tons}
                 onChange={handleChange}
                 placeholder="e.g. 500.0"
-                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-100 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono"
+                className="w-full px-4 py-3 bg-[#F7FAF5] border border-[#DDE8DF] rounded-xl text-sm text-[#123524] focus:ring-2 focus:ring-[#075B2A] focus:border-[#075B2A] outline-none font-mono"
               />
             </div>
 
@@ -125,31 +126,32 @@ const AddWarehousePage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 py-3 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl transition shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 disabled:opacity-50"
+                className="flex-1 py-3.5 px-4 bg-[#075B2A] hover:bg-[#064D25] text-white font-bold text-sm rounded-xl transition shadow-soft flex items-center justify-center space-x-2 disabled:opacity-50"
               >
                 {loading ? (
-                  <span>Registering...</span>
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Registering Facility...</span>
+                  </>
                 ) : (
                   <>
                     <PlusCircle className="w-4 h-4" />
-                    <span>Register Facility</span>
+                    <span>Register Storage Facility</span>
                   </>
                 )}
               </button>
               <button
                 type="button"
                 onClick={() => navigate('/warehouse/facilities')}
-                className="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl transition"
+                className="px-6 py-3.5 bg-[#F7FAF5] hover:bg-[#EAF5EC] text-[#123524] font-bold text-sm rounded-xl border border-[#DDE8DF] transition"
               >
                 Cancel
               </button>
             </div>
           </form>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

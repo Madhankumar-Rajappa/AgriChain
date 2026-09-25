@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
+import AppLayout from '../../components/AppLayout';
 import { fetchMyShipments, updateShipmentStatus } from '../../api/shipments';
 import { 
   Truck, 
@@ -10,13 +9,13 @@ import {
   Phone, 
   User, 
   Calendar, 
-  RefreshCw, 
   AlertCircle, 
   CheckCircle2, 
   Clock, 
-  Navigation,
-  ShieldCheck,
-  Filter
+  Navigation, 
+  ShieldCheck, 
+  Filter,
+  Loader2
 } from 'lucide-react';
 
 const TransporterDashboardPage = () => {
@@ -63,51 +62,57 @@ const TransporterDashboardPage = () => {
   const getShipmentBadge = (status) => {
     switch (status) {
       case 'ASSIGNED':
-        return <span className="px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-indigo-950 text-indigo-300 border border-indigo-800 flex items-center gap-1"><Clock className="w-3 h-3" /> VEHICLE ASSIGNED</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-800 border border-indigo-200 flex items-center gap-1.5">
+            <Clock className="w-3.5 h-3.5 text-indigo-600" /> VEHICLE ASSIGNED
+          </span>
+        );
       case 'PICKED_UP':
-        return <span className="px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-amber-950 text-amber-300 border border-amber-800 flex items-center gap-1"><Navigation className="w-3 h-3" /> PICKED UP</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5">
+            <Navigation className="w-3.5 h-3.5 text-amber-600" /> PICKED UP FROM HUB
+          </span>
+        );
       case 'IN_TRANSIT':
-        return <span className="px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-blue-950 text-blue-300 border border-blue-800 flex items-center gap-1"><Truck className="w-3 h-3" /> IN TRANSIT</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1.5">
+            <Truck className="w-3.5 h-3.5 text-blue-600" /> IN HIGHWAY TRANSIT
+          </span>
+        );
       case 'DELIVERED':
-        return <span className="px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> SAFELY DELIVERED</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#EAF5EC] text-[#075B2A] border border-[#DDE8DF] flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#075B2A]" /> SAFELY DELIVERED
+          </span>
+        );
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-3xs font-semibold bg-slate-800 text-slate-300">{status}</span>;
+        return (
+          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+            {status}
+          </span>
+        );
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <Navbar />
-
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-              <Truck className="w-6 h-6 text-indigo-400" /> Logistics & Transport Dispatch
-            </h1>
-            <p className="text-xs text-slate-400">Track assigned vehicle dispatches, update live transit locations, and complete crop deliveries</p>
-          </div>
-
-          <Link
-            to="/transporter/assign"
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02]"
-          >
-            <Plus className="w-4 h-4" /> Dispatch New Shipment
-          </Link>
-        </div>
-
-        {/* Filter Bar */}
-        <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <span className="text-xs text-slate-300 font-medium">Filter Status:</span>
+    <AppLayout
+      title="Logistics & Fleet Dispatch"
+      subtitle="Track assigned vehicle dispatches, update live transit locations, and complete crop deliveries"
+      breadcrumb="Logistics Management"
+    >
+      <div className="space-y-6">
+        {/* Top Controls Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {/* Filter Bar */}
+          <div className="bg-white border border-[#DDE8DF] rounded-2xl px-4 py-2.5 shadow-soft flex items-center gap-3">
+            <Filter className="w-4 h-4 text-[#66756B]" />
+            <span className="text-xs text-[#123524] font-bold">Status:</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+              className="bg-[#F7FAF5] border border-[#DDE8DF] text-xs text-[#123524] font-semibold rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#075B2A]"
             >
-              <option value="">All Shipments</option>
+              <option value="">All Dispatches ({total})</option>
               <option value="ASSIGNED">Assigned</option>
               <option value="PICKED_UP">Picked Up</option>
               <option value="IN_TRANSIT">In Transit</option>
@@ -115,30 +120,33 @@ const TransporterDashboardPage = () => {
             </select>
           </div>
 
-          <div className="text-xs text-slate-400">
-            Total Active Dispatches: <strong className="text-slate-200">{total}</strong>
-          </div>
+          <Link
+            to="/transporter/assign"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#075B2A] hover:bg-[#064D25] text-white font-bold text-xs rounded-xl shadow-soft transition-all hover:scale-[1.02] self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Dispatch New Vehicle
+          </Link>
         </div>
 
         {/* Content View */}
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center text-slate-400">
-            <RefreshCw className="w-8 h-8 animate-spin text-indigo-500 mb-2" />
-            <p className="text-xs">Loading assigned dispatches...</p>
+          <div className="py-20 flex flex-col items-center justify-center text-[#66756B]">
+            <Loader2 className="w-8 h-8 animate-spin text-[#075B2A] mb-3" />
+            <p className="text-sm font-semibold">Loading assigned dispatches...</p>
           </div>
         ) : error ? (
-          <div className="p-4 bg-rose-950/60 border border-rose-800 text-rose-300 rounded-2xl text-xs max-w-md mx-auto my-12 flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-rose-400" />
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs max-w-md mx-auto my-8 flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-500 shrink-0" />
             <span>{error}</span>
           </div>
         ) : shipments.length === 0 ? (
-          <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-12 text-center max-w-lg mx-auto my-8">
-            <Truck className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-slate-200 mb-1">No Active Assigned Shipments</h3>
-            <p className="text-xs text-slate-400 mb-6">Dispatch a vehicle for a paid crop order ready for transportation.</p>
+          <div className="bg-white border border-[#DDE8DF] rounded-3xl p-12 text-center max-w-lg mx-auto my-8 shadow-soft">
+            <Truck className="w-12 h-12 text-[#66756B] mx-auto mb-3" />
+            <h3 className="text-base font-bold text-[#123524] mb-1">No Active Assigned Shipments</h3>
+            <p className="text-xs text-[#66756B] mb-6">Dispatch a vehicle for a paid crop consignment awaiting road transport.</p>
             <Link
               to="/transporter/assign"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#075B2A] hover:bg-[#064D25] text-white text-xs font-bold rounded-xl shadow-soft"
             >
               Dispatch New Vehicle
             </Link>
@@ -148,66 +156,68 @@ const TransporterDashboardPage = () => {
             {shipments.map((s) => (
               <div
                 key={s.id}
-                className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 transition-all shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-6"
+                className="bg-white border border-[#DDE8DF] hover:border-[#B2D8BD] rounded-3xl p-6 transition-all shadow-soft hover:shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6"
               >
-                <div className="space-y-2 flex-1">
+                <div className="space-y-3 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
-                    <span className="text-xs font-bold text-slate-400">Shipment #{s.id}</span>
-                    <span className="text-xs font-bold text-indigo-400">Order #{s.order_id}</span>
+                    <span className="text-xs font-bold text-[#66756B]">Dispatch #{s.id}</span>
+                    <span className="text-xs font-bold text-[#075B2A] bg-[#EAF5EC] px-2.5 py-0.5 rounded-full border border-[#DDE8DF]">
+                      Order #{s.order_id}
+                    </span>
                     {getShipmentBadge(s.shipment_status)}
                   </div>
 
-                  <div className="flex items-center space-x-3">
-                    <span className="px-3 py-1 bg-indigo-950 border border-indigo-800 rounded-lg font-mono font-bold text-sm text-indigo-300">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="px-3.5 py-1 bg-[#EAF5EC] border border-[#DDE8DF] rounded-xl font-mono font-bold text-sm text-[#075B2A]">
                       {s.vehicle_number}
                     </span>
-                    <span className="text-xs text-slate-300 font-semibold flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-slate-400" /> Driver: {s.driver_name}
+                    <span className="text-xs text-[#123524] font-bold flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5 text-[#075B2A]" /> Driver: {s.driver_name}
                     </span>
-                    <span className="text-xs text-slate-400 flex items-center gap-1 font-mono">
-                      <Phone className="w-3.5 h-3.5 text-slate-400" /> {s.driver_phone}
+                    <span className="text-xs text-[#66756B] flex items-center gap-1 font-mono">
+                      <Phone className="w-3.5 h-3.5 text-[#075B2A]" /> {s.driver_phone}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-950/70 p-3 rounded-xl border border-slate-800/80 max-w-2xl mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-[#F7FAF5] p-3.5 rounded-2xl border border-[#DDE8DF] max-w-2xl">
                     <div>
-                      <span className="text-slate-400 text-3xs block mb-0.5">Pickup Origin:</span>
-                      <div className="font-semibold text-slate-200 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-amber-400 shrink-0" /> {s.pickup_address}
+                      <span className="text-[#66756B] text-[11px] block mb-0.5">Pickup Warehouse / Farm:</span>
+                      <div className="font-semibold text-[#123524] flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-amber-600 shrink-0" /> {s.pickup_address}
                       </div>
                     </div>
                     <div>
-                      <span className="text-slate-400 text-3xs block mb-0.5">Delivery Destination:</span>
-                      <div className="font-semibold text-slate-200 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> {s.delivery_address}
+                      <span className="text-[#66756B] text-[11px] block mb-0.5">Delivery Destination:</span>
+                      <div className="font-semibold text-[#123524] flex items-center gap-1.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#075B2A] shrink-0" /> {s.delivery_address}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 text-3xs text-slate-400 pt-1">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3 text-slate-500" /> Est. Delivery: {s.estimated_delivery ? new Date(s.estimated_delivery).toLocaleDateString() : 'N/A'}
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#66756B]">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-[#075B2A]" /> Est. Delivery: {s.estimated_delivery ? new Date(s.estimated_delivery).toLocaleDateString() : 'Pending ETA'}
                     </span>
                     {s.actual_delivery && (
-                      <span className="text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Delivered: {new Date(s.actual_delivery).toLocaleString()}
+                      <span className="text-[#075B2A] font-semibold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#075B2A]" /> Delivered: {new Date(s.actual_delivery).toLocaleString()}
                       </span>
                     )}
                   </div>
 
                   {s.tracking_notes && (
-                    <p className="text-3xs text-indigo-300/80 bg-indigo-950/30 px-3 py-1 rounded-lg border border-indigo-900/40 w-fit">
-                      Note: {s.tracking_notes}
+                    <p className="text-xs text-[#123524] bg-[#EAF5EC] px-3.5 py-1.5 rounded-xl border border-[#DDE8DF] w-fit font-medium">
+                      Transit Note: {s.tracking_notes}
                     </p>
                   )}
                 </div>
 
                 {/* Status action buttons */}
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
                   {s.shipment_status === 'ASSIGNED' && (
                     <button
                       onClick={() => handleUpdateStatus(s.id, 'PICKED_UP')}
-                      className="px-3.5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"
+                      className="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition shadow-soft flex items-center gap-1.5"
                     >
                       <Navigation className="w-4 h-4" /> Mark Picked Up
                     </button>
@@ -216,7 +226,7 @@ const TransporterDashboardPage = () => {
                   {(s.shipment_status === 'PICKED_UP' || s.shipment_status === 'ASSIGNED') && (
                     <button
                       onClick={() => handleUpdateStatus(s.id, 'IN_TRANSIT')}
-                      className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"
+                      className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition shadow-soft flex items-center gap-1.5"
                     >
                       <Truck className="w-4 h-4" /> Mark In Transit
                     </button>
@@ -225,9 +235,9 @@ const TransporterDashboardPage = () => {
                   {s.shipment_status === 'IN_TRANSIT' && (
                     <button
                       onClick={() => handleUpdateStatus(s.id, 'DELIVERED')}
-                      className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"
+                      className="px-4 py-2.5 bg-[#075B2A] hover:bg-[#064D25] text-white text-xs font-bold rounded-xl transition shadow-soft flex items-center gap-1.5"
                     >
-                      <ShieldCheck className="w-4 h-4" /> Mark Delivered
+                      <ShieldCheck className="w-4 h-4" /> Confirm Delivered
                     </button>
                   )}
                 </div>
@@ -235,10 +245,8 @@ const TransporterDashboardPage = () => {
             ))}
           </div>
         )}
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </AppLayout>
   );
 };
 

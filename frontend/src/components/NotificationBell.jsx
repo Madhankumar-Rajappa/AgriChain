@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { fetchMyNotifications, markNotificationRead, markAllNotificationsRead } from '../api/notifications';
-import { Bell, CheckCheck, Clock, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Bell, CheckCheck, Clock } from 'lucide-react';
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
   const loadNotifications = async () => {
@@ -21,7 +20,7 @@ const NotificationBell = () => {
 
   useEffect(() => {
     loadNotifications();
-    const interval = setInterval(loadNotifications, 30000); // Poll every 30s
+    const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,25 +60,25 @@ const NotificationBell = () => {
           setIsOpen(!isOpen);
           if (!isOpen) loadNotifications();
         }}
-        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition relative"
+        className="p-2 rounded-xl bg-white hover:bg-[#F5F8F3] text-[#123524] border border-[#DDE8DF] transition relative shadow-2xs"
         title="Notifications"
       >
-        <Bell className="w-4 h-4 text-emerald-400" />
+        <Bell className="w-4 h-4 text-[#075B2A]" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-emerald-500 text-slate-950 font-bold text-3xs w-4 h-4 rounded-full flex items-center justify-center border-2 border-slate-900 shadow-md">
+          <span className="absolute -top-1 -right-1 bg-[#16A34A] text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white shadow-xs">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
-          <div className="p-3.5 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-[#DDE8DF] rounded-2xl shadow-elevated z-50 overflow-hidden">
+          <div className="p-3.5 bg-[#F7FAF5] border-b border-[#DDE8DF] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Bell className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-bold text-slate-200">Notifications</span>
+              <Bell className="w-4 h-4 text-[#075B2A]" />
+              <span className="text-xs font-bold text-[#123524]">Notifications</span>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-3xs font-semibold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#EAF5EC] text-[#075B2A] border border-[#DDE8DF]">
                   {unreadCount} new
                 </span>
               )}
@@ -87,16 +86,16 @@ const NotificationBell = () => {
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllRead}
-                className="text-3xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition"
+                className="text-[11px] font-semibold text-[#075B2A] hover:text-[#0B7A36] flex items-center gap-1 transition"
               >
                 <CheckCheck className="w-3.5 h-3.5" /> Mark All Read
               </button>
             )}
           </div>
 
-          <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/60">
+          <div className="max-h-80 overflow-y-auto divide-y divide-[#EBF2ED]">
             {notifications.length === 0 ? (
-              <div className="p-6 text-center text-slate-500 text-xs">
+              <div className="p-6 text-center text-[#66756B] text-xs">
                 No notifications yet.
               </div>
             ) : (
@@ -104,19 +103,19 @@ const NotificationBell = () => {
                 <div
                   key={n.id}
                   onClick={() => handleMarkRead(n.id, n.is_read)}
-                  className={`p-3.5 transition cursor-pointer hover:bg-slate-850 ${
-                    n.is_read ? 'bg-slate-900/40 opacity-70' : 'bg-slate-900 font-medium'
+                  className={`p-3.5 transition cursor-pointer hover:bg-[#F7FAF5] ${
+                    n.is_read ? 'bg-white opacity-70' : 'bg-[#F7FAF5]/50 font-medium'
                   }`}
                 >
                   <div className="flex justify-between items-start mb-1">
-                    <h4 className={`text-xs font-bold ${n.is_read ? 'text-slate-300' : 'text-slate-100'}`}>
+                    <h4 className={`text-xs font-bold ${n.is_read ? 'text-[#66756B]' : 'text-[#123524]'}`}>
                       {n.title}
                     </h4>
-                    <span className="text-3xs text-slate-500 flex items-center gap-1 shrink-0 ml-2">
+                    <span className="text-[10px] text-[#66756B] flex items-center gap-1 shrink-0 ml-2">
                       <Clock className="w-3 h-3" /> {new Date(n.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{n.message}</p>
+                  <p className="text-xs text-[#66756B] line-clamp-2 leading-relaxed">{n.message}</p>
                 </div>
               ))
             )}
