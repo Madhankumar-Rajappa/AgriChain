@@ -10,11 +10,14 @@ const NotificationBell = () => {
 
   const loadNotifications = async () => {
     try {
+      const token = localStorage.getItem('agrichain_token');
+      if (!token) return;
       const data = await fetchMyNotifications({ limit: 10 });
-      setNotifications(data.items);
-      setUnreadCount(data.unread_count);
+      setNotifications(data.items || []);
+      setUnreadCount(data.unread_count || 0);
     } catch (err) {
-      console.error('Failed to load notifications:', err);
+      // Quietly log debug info without breaking UI
+      console.debug('Notification poll:', err.message);
     }
   };
 
