@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     MYSQL_DATABASE: str = "agrichain_db"
     
     DATABASE_URL: str = "mysql+pymysql://root:root@localhost:3306/agrichain_db"
+    
+    # Official Agricultural Market Prices and Image Resolver APIs
+    MARKET_DATA_API_KEY: str = ""
+    DATA_GOV_RESOURCE_ID: str = "9ef84268-d588-465a-a308-a864a43d0070"
+    CROP_IMAGE_API_KEY: str = ""
 
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",

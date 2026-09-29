@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import { fetchMyOrders, cancelOrder } from '../../api/orders';
-import { ShoppingBag, Filter, RefreshCw, AlertCircle, MapPin, Calendar, XCircle, CheckCircle2, Clock, CreditCard } from 'lucide-react';
+import { fetchShipmentByOrderId } from '../../api/shipments';
+import { ShoppingBag, Filter, RefreshCw, AlertCircle, MapPin, Calendar, XCircle, CheckCircle2, Clock, CreditCard, Radio } from 'lucide-react';
 
 export default function MyOrdersPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -40,6 +43,22 @@ export default function MyOrdersPage() {
       loadOrders();
     } catch (err) {
       alert(err.response?.data?.detail || 'Failed to cancel order.');
+    }
+  };
+
+  const handleTrackOrder = async (orderId) => {
+    setTrackingOrderId(orderId);
+    try {
+      const shipment = await fetchShipmentByOrderId(orderId);
+      if (shipment?.id) {
+        navigate(`/tracking/${shipment.id}`);
+      } else {
+        alert(`Shipment dispatch has not been created yet for Order #${orderId}.`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.detail || 'No shipment dispatch has been assigned to this order yet.');
+    } finally {
+      setTrackingOrderId(null);
     }
   };
 
@@ -180,6 +199,17 @@ export default function MyOrdersPage() {
 
                   {/* Actions Column */}
                   <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end gap-2 shrink-0">
+                    {['READY_FOR_PICKUP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'PAID', 'STORAGE_PENDING'].includes(order.status) && (
+                      <button
+                        onClick={() => handleTrackOrder(order.id)}
+                        disabled={trackingOrderId === order.id}
+                        className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-soft flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
+                      >
+                        <Radio className="w-4 h-4 animate-pulse" />
+                        <span>{trackingOrderId === order.id ? 'Locating...' : 'Track Live Shipment'}</span>
+                      </button>
+                    )}
+
                     {canPay && (
                       <Link
                         to={`/orders/${order.id}/pay`}

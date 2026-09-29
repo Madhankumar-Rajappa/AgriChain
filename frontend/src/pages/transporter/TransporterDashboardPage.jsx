@@ -15,7 +15,8 @@ import {
   Navigation, 
   ShieldCheck, 
   Filter,
-  Loader2
+  Loader2,
+  Radio
 } from 'lucide-react';
 
 const TransporterDashboardPage = () => {
@@ -214,6 +215,13 @@ const TransporterDashboardPage = () => {
 
                 {/* Status action buttons */}
                 <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                  <Link
+                    to={`/tracking/${s.id}`}
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-soft flex items-center gap-1.5"
+                  >
+                    <Radio className="w-4 h-4 animate-pulse" /> Live Tracking Map
+                  </Link>
+
                   {s.shipment_status === 'ASSIGNED' && (
                     <button
                       onClick={() => handleUpdateStatus(s.id, 'PICKED_UP')}

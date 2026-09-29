@@ -6,6 +6,7 @@ from app.models.notification import Notification
 from app.models.payment import Payment, PaymentStatus, PaymentMethod
 from app.models.warehouse import Warehouse, StorageBooking, StorageStatus
 from app.models.shipment import Shipment, ShipmentStatus
+from app.models.shipment_location import ShipmentLocation
 
 __all__ = [
     "Base",
@@ -25,7 +26,8 @@ __all__ = [
     "StorageBooking",
     "StorageStatus",
     "Shipment",
-    "ShipmentStatus"
+    "ShipmentStatus",
+    "ShipmentLocation",
 ]
 
 

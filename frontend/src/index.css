@@ -30,3 +30,26 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #0B7A36;
 }
+
+/* Leaflet Map Dimensions & Container Styling */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 1rem;
+  z-index: 1;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}

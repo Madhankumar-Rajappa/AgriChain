@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppLayout from '../../components/AppLayout';
 import { fetchIncomingOrders, acceptOrder, rejectOrder } from '../../api/orders';
-import { Sprout, Filter, RefreshCw, AlertCircle, Check, X, Clock, MapPin, Calendar, Loader2 } from 'lucide-react';
+import { fetchShipmentByOrderId } from '../../api/shipments';
+import { Sprout, Filter, RefreshCw, AlertCircle, Check, X, Clock, MapPin, Calendar, Loader2, Radio } from 'lucide-react';
 
 export default function FarmerIncomingOrdersPage() {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
   const [processingId, setProcessingId] = useState(null);
+  const [trackingOrderId, setTrackingOrderId] = useState(null);
 
   const loadIncomingOrders = async () => {
     setLoading(true);
@@ -30,6 +34,22 @@ export default function FarmerIncomingOrdersPage() {
   useEffect(() => {
     loadIncomingOrders();
   }, [statusFilter]);
+
+  const handleTrackOrder = async (orderId) => {
+    setTrackingOrderId(orderId);
+    try {
+      const shipment = await fetchShipmentByOrderId(orderId);
+      if (shipment?.id) {
+        navigate(`/tracking/${shipment.id}`);
+      } else {
+        alert(`Shipment dispatch has not been created yet for Order #${orderId}.`);
+      }
+    } catch (err) {
+      alert(err.response?.data?.detail || 'No shipment dispatch has been assigned to this order yet.');
+    } finally {
+      setTrackingOrderId(null);
+    }
+  };
 
   const handleAccept = async (orderId) => {
     if (!window.confirm(`Accept incoming order #${orderId}? Stock reservation will be confirmed.`)) return;
@@ -208,9 +228,21 @@ export default function FarmerIncomingOrdersPage() {
                       </button>
                     </div>
                   ) : (
-                    <div className="text-right shrink-0">
-                      <span className="text-[11px] text-[#66756B]">Status:</span>
-                      <div className="font-bold text-xs text-[#123524]">{order.status}</div>
+                    <div className="flex flex-col items-end gap-2 shrink-0">
+                      {['READY_FOR_PICKUP', 'IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'PAID', 'STORAGE_PENDING'].includes(order.status) && (
+                        <button
+                          onClick={() => handleTrackOrder(order.id)}
+                          disabled={trackingOrderId === order.id}
+                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-soft flex items-center gap-1.5 transition-all disabled:opacity-50"
+                        >
+                          <Radio className="w-3.5 h-3.5 animate-pulse" />
+                          <span>{trackingOrderId === order.id ? 'Locating...' : 'Track Shipment'}</span>
+                        </button>
+                      )}
+                      <div className="text-right">
+                        <span className="text-[11px] text-[#66756B]">Status:</span>
+                        <div className="font-bold text-xs text-[#123524]">{order.status}</div>
+                      </div>
                     </div>
                   )}
                 </div>

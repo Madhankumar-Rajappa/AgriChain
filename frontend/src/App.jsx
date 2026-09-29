@@ -19,6 +19,8 @@ import AddWarehousePage from './pages/warehouse/AddWarehousePage';
 import TransporterDashboardPage from './pages/transporter/TransporterDashboardPage';
 import AssignShipmentPage from './pages/transporter/AssignShipmentPage';
 import AdminAnalyticsDashboardPage from './pages/admin/AdminAnalyticsDashboardPage';
+import MarketPricesPage from './pages/farmer/MarketPricesPage';
+import LiveShipmentTrackingPage from './pages/tracking/LiveShipmentTrackingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -122,7 +124,33 @@ export default function App() {
             }
           />
 
+          {/* Live Shipment Tracking Route */}
+          <Route
+            path="/tracking/:shipmentId"
+            element={
+              <ProtectedRoute allowedRoles={['FARMER', 'BUYER', 'TRANSPORTER', 'ADMIN']}>
+                <LiveShipmentTrackingPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Farmer Crop & Order Management Routes */}
+          <Route
+            path="/farmer/market-prices"
+            element={
+              <ProtectedRoute allowedRoles={['FARMER', 'ADMIN', 'BUYER', 'WAREHOUSE_MANAGER', 'TRANSPORTER']}>
+                <MarketPricesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/market-prices"
+            element={
+              <ProtectedRoute>
+                <MarketPricesPage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/farmer/crops"
             element={

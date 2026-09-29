@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import HealthBadge from './HealthBadge';
 import NotificationBell from './NotificationBell';
-import { Sprout, LogOut, LayoutDashboard, LogIn, UserPlus, Store } from 'lucide-react';
+import { Sprout, LogOut, LayoutDashboard, LogIn, UserPlus, Store, TrendingUp } from 'lucide-react';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -41,6 +41,18 @@ export default function Navbar() {
           >
             <Store className="w-4 h-4 text-[#075B2A]" />
             Marketplace
+          </Link>
+
+          <Link
+            to="/market-prices"
+            className={`hidden md:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+              location.pathname.includes('market-prices')
+                ? 'bg-[#EAF5EC] text-[#075B2A] border border-[#DDE8DF]'
+                : 'text-[#66756B] hover:text-[#123524] hover:bg-[#F5F8F3]'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4 text-[#075B2A]" />
+            Market Prices
           </Link>
         </div>
 

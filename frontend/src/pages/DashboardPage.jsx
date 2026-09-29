@@ -34,10 +34,10 @@ export default function DashboardPage() {
         { label: 'Total Sales', value: '₹48,500', change: 'Escrow protected', icon: IndianRupee, color: 'emerald' },
       ],
       actions: [
+        { title: 'Mandi Market Prices', desc: 'Real-time official government mandi benchmark rates & crop photos', link: '/farmer/market-prices', icon: TrendingUp },
         { title: 'My Crop Listings', desc: 'View, edit, and deactivate active produce', link: '/farmer/crops', icon: Box },
         { title: 'Post New Harvest', desc: 'List new crop yield on the marketplace', link: '/farmer/crops/add', icon: Plus },
-        { title: 'Incoming Buyer Orders', desc: 'Review, accept, or reject incoming orders', link: '/farmer/orders', icon: Inbox },
-        { title: 'Crop Marketplace', desc: 'Browse live prices & competing listings', link: '/marketplace', icon: Store }
+        { title: 'Incoming Buyer Orders', desc: 'Review, accept, or reject incoming orders', link: '/farmer/orders', icon: Inbox }
       ]
     },
     BUYER: {

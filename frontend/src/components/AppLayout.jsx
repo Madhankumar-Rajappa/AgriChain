@@ -18,7 +18,8 @@ import {
   X, 
   User, 
   ChevronRight,
-  Leaf
+  Leaf,
+  TrendingUp
 } from 'lucide-react';
 
 export default function AppLayout({ children, title, subtitle, breadcrumb }) {
@@ -36,6 +37,7 @@ export default function AppLayout({ children, title, subtitle, breadcrumb }) {
   const getNavItems = () => {
     const common = [
       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+      { name: 'Market Prices', path: '/farmer/market-prices', icon: TrendingUp },
       { name: 'Marketplace', path: '/marketplace', icon: Store },
     ];
 
@@ -44,6 +46,7 @@ export default function AppLayout({ children, title, subtitle, breadcrumb }) {
     if (user.role === 'FARMER') {
       return [
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Market Prices', path: '/farmer/market-prices', icon: TrendingUp },
         { name: 'My Crops', path: '/farmer/crops', icon: Sprout },
         { name: 'Post Harvest', path: '/farmer/crops/add', icon: PlusCircle },
         { name: 'Incoming Orders', path: '/farmer/orders', icon: Inbox },
