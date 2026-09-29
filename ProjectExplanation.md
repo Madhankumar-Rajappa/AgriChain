@@ -146,6 +146,13 @@ flowchart TD
 - Built Notification system for real-time order and shipment alerts (`GET/PATCH /api/v1/notifications`).
 - Created React page: `AdminAnalyticsDashboardPage.jsx` and `NotificationBell.jsx` component.
 
+### Phase 10: Real-Time Live GPS Logistics & Road Routing System
+- **Geocoding Engine**: Server-side address geocoding via OpenStreetMap Nominatim with in-memory caching and throttle handling.
+- **Road Routing Engine**: Real highway and road network geometry via OSRM (Open Source Routing Machine), computing total road distances, travel duration estimates, and progress along the route.
+- **Full-Duplex WebSockets**: Real-time GPS broadcasting pipeline (`/ws/tracking/{shipment_id}`) with automatic reconnection, heartbeat pings, and fallback REST endpoints.
+- **Interactive Leaflet Map**: High-performance Leaflet mapping interface with custom dynamic vehicle heading markers, pulse animations, road route polylines, GPS history trails, and auto-fit viewport bounds.
+- **Telemetry HUD**: Driver speed (km/h), bearing/heading, GPS accuracy, route progress percentage bar, and trip milestones.
+
 ### User Interface & Interactivity Upgrade
 - Added **Instant 1-Click Interactive Demo Login** bar on `LandingPage.jsx` for 5 pre-seeded accounts.
 - Added live crop marketplace feed with category filters and search bar directly on the home page.
@@ -260,12 +267,33 @@ CREATE TABLE shipments (
     shipment_status ENUM('ASSIGNED', 'PICKED_UP', 'IN_TRANSIT', 'DELIVERED', 'FAILED') DEFAULT 'ASSIGNED' NOT NULL,
     pickup_address TEXT NOT NULL,
     delivery_address TEXT NOT NULL,
+    pickup_lat FLOAT NULL,
+    pickup_lng FLOAT NULL,
+    destination_lat FLOAT NULL,
+    destination_lng FLOAT NULL,
     estimated_delivery DATETIME,
     actual_delivery DATETIME,
+    tracking_notes TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
     FOREIGN KEY (transporter_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE SET NULL
+);
+
+-- 8. Shipment Locations (Real-Time GPS Tracking History)
+CREATE TABLE shipment_locations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    shipment_id INT NOT NULL,
+    latitude FLOAT NOT NULL,
+    longitude FLOAT NOT NULL,
+    accuracy FLOAT NULL,
+    speed FLOAT NULL,
+    heading FLOAT NULL,
+    altitude FLOAT NULL,
+    recorded_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY (shipment_id) REFERENCES shipments(id) ON DELETE CASCADE,
+    INDEX ix_shipment_locations_shipment_id (shipment_id),
+    INDEX ix_shipment_locations_recorded_at (recorded_at)
 );
 ```
 

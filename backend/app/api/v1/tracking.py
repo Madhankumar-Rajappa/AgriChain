@@ -21,7 +21,8 @@ from app.schemas.tracking import (
     LocationUpdate,
     LocationOut,
     TrackingSessionStatus,
-    TrackingHistoryOut
+    TrackingHistoryOut,
+    RouteOut
 )
 from app.services.tracking_service import TrackingService, tracking_ws_manager
 
@@ -98,6 +99,21 @@ def get_tracking_history(
     """
     service = TrackingService(db)
     return service.get_history(current_user, shipment_id, limit=limit)
+
+
+@router.get("/{shipment_id}/route", response_model=RouteOut, summary="Get Real Road Route")
+async def get_route(
+    shipment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """
+    Returns real road route geometry between shipment pickup and destination.
+    Uses geocoded coordinates and OSRM routing engine.
+    Includes distance, duration, and distance progress if transporter has GPS data.
+    """
+    service = TrackingService(db)
+    return await service.get_route(current_user, shipment_id)
 
 
 @router.websocket("/ws/{shipment_id}")

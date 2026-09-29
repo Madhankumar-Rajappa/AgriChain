@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchShipmentById, updateShipmentStatus } from '../../api/shipments';
@@ -7,7 +7,8 @@ import {
   stopTracking,
   getLatestLocation,
   getTrackingHistory,
-  recordLocation
+  recordLocation,
+  getRoute
 } from '../../api/tracking';
 import { useTrackingWebSocket } from '../../hooks/useTrackingWebSocket';
 import LiveTrackingMap from '../../components/LiveTrackingMap';
@@ -25,7 +26,12 @@ import {
   CheckCircle2,
   Clock,
   Radio,
-  Navigation
+  Navigation,
+  Milestone,
+  Route as RouteIcon,
+  Compass,
+  Zap,
+  TrendingUp
 } from 'lucide-react';
 
 export default function LiveShipmentTrackingPage() {
@@ -36,6 +42,7 @@ export default function LiveShipmentTrackingPage() {
 
   const [shipment, setShipment] = useState(null);
   const [historyPoints, setHistoryPoints] = useState([]);
+  const [routeData, setRouteData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [permissionError, setPermissionError] = useState(null);
@@ -58,13 +65,24 @@ export default function LiveShipmentTrackingPage() {
 
   const isTransporter = user?.role === 'TRANSPORTER' || user?.role === 'ADMIN';
 
-  // Load shipment & initial location data
+  // Load shipment, location history, and road route data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
+      
       const data = await fetchShipmentById(shipmentId);
       setShipment(data);
+
+      // Fetch road route geometry & distances
+      try {
+        const routeRes = await getRoute(shipmentId);
+        if (routeRes) {
+          setRouteData(routeRes);
+        }
+      } catch (rErr) {
+        console.warn('Could not load road route:', rErr);
+      }
 
       // Load location history
       try {
@@ -116,6 +134,35 @@ export default function LiveShipmentTrackingPage() {
       }
     };
   }, []);
+
+  // Compute pickup and destination coordinates
+  const pickupCoords = useMemo(() => {
+    if (routeData?.pickup_coords && routeData.pickup_coords.length === 2) {
+      return routeData.pickup_coords;
+    }
+    if (shipment?.pickup_lat && shipment?.pickup_lng) {
+      return [shipment.pickup_lat, shipment.pickup_lng];
+    }
+    return null;
+  }, [routeData, shipment]);
+
+  const destinationCoords = useMemo(() => {
+    if (routeData?.destination_coords && routeData.destination_coords.length === 2) {
+      return routeData.destination_coords;
+    }
+    if (shipment?.destination_lat && shipment?.destination_lng) {
+      return [shipment.destination_lat, shipment.destination_lng];
+    }
+    return null;
+  }, [routeData, shipment]);
+
+  // Progress percentage calculation
+  const progressPercent = useMemo(() => {
+    if (!routeData?.total_distance_km || routeData.total_distance_km <= 0) return 0;
+    const travelled = routeData.distance_travelled_km || 0;
+    const pct = Math.min(100, Math.max(0, Math.round((travelled / routeData.total_distance_km) * 100)));
+    return pct;
+  }, [routeData]);
 
   // Handler for transporter starting live tracking
   const handleStartTracking = async () => {
@@ -246,7 +293,7 @@ export default function LiveShipmentTrackingPage() {
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Connecting Live Tracking GPS...</h3>
-        <p className="text-sm text-slate-500 mt-1">Retrieving shipment telemetry and map tiles</p>
+        <p className="text-sm text-slate-500 mt-1">Calculating road routes and map coordinates</p>
       </div>
     );
   }
@@ -350,6 +397,73 @@ export default function LiveShipmentTrackingPage() {
         </div>
       )}
 
+      {/* Route & Distance Telemetry Banner (if route calculated) */}
+      {routeData && (
+        <div className="mb-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-5 text-white shadow-lg border border-slate-700">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl border border-blue-500/30">
+                <RouteIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Total Road Distance</p>
+                <p className="text-lg font-extrabold text-white">{routeData.total_distance_km ? `${routeData.total_distance_km} km` : 'Calculating...'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl border border-emerald-500/30">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Distance Travelled</p>
+                <p className="text-lg font-extrabold text-emerald-400">{routeData.distance_travelled_km !== undefined ? `${routeData.distance_travelled_km} km` : '0 km'}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-amber-500/20 text-amber-400 rounded-xl border border-amber-500/30">
+                <Milestone className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Remaining Distance</p>
+                <p className="text-lg font-extrabold text-amber-400">{routeData.distance_remaining_km !== undefined ? `${routeData.distance_remaining_km} km` : `${routeData.total_distance_km || 0} km`}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Est. Road Time</p>
+                <p className="text-lg font-extrabold text-purple-300">
+                  {routeData.total_duration_min
+                    ? routeData.total_duration_min > 60
+                      ? `${Math.floor(routeData.total_duration_min / 60)}h ${Math.round(routeData.total_duration_min % 60)}m`
+                      : `${Math.round(routeData.total_duration_min)} mins`
+                    : 'N/A'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Route Progress Bar */}
+          <div className="mt-4 pt-3 border-t border-slate-700/60">
+            <div className="flex justify-between items-center text-xs mb-1.5">
+              <span className="text-slate-400 font-medium">Route Completion Progress</span>
+              <span className="font-bold text-emerald-400">{progressPercent}%</span>
+            </div>
+            <div className="w-full bg-slate-700 h-2.5 rounded-full overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Grid: Interactive Map + Shipment Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column: Interactive Map (2 Columns on Desktop) */}
@@ -360,6 +474,11 @@ export default function LiveShipmentTrackingPage() {
             historyPoints={historyPoints}
             connectionStatus={connectionStatus}
             isTrackingActive={isTrackingActive}
+            pickupCoords={pickupCoords}
+            destinationCoords={destinationCoords}
+            routeGeometry={routeData?.route_geometry}
+            routeDistanceKm={routeData?.total_distance_km}
+            routeDurationMin={routeData?.total_duration_min}
           />
 
           {/* Privacy & Operational Assurance Box */}
@@ -367,7 +486,7 @@ export default function LiveShipmentTrackingPage() {
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>
-                <strong>Privacy Guaranteed:</strong> Real-time location is shared strictly between the verified Farmer, Buyer, and Transporter during active transit.
+                <strong>Real-Time Route Telemetry:</strong> Accurate road network routing and GPS tracking powered by OpenStreetMap and OSRM engine.
               </span>
             </div>
             {isTrackingActive && (
@@ -436,6 +555,11 @@ export default function LiveShipmentTrackingPage() {
                 <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
                   {shipment.pickup_address}
                 </p>
+                {pickupCoords && (
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {pickupCoords[0]?.toFixed(4)}°, {pickupCoords[1]?.toFixed(4)}°
+                  </span>
+                )}
               </div>
 
               {/* Delivery Destination */}
@@ -447,6 +571,11 @@ export default function LiveShipmentTrackingPage() {
                 <p className="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
                   {shipment.delivery_address}
                 </p>
+                {destinationCoords && (
+                  <span className="text-[10px] text-slate-400 font-mono">
+                    {destinationCoords[0]?.toFixed(4)}°, {destinationCoords[1]?.toFixed(4)}°
+                  </span>
+                )}
               </div>
             </div>
           </div>

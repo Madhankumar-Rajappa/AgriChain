@@ -26,3 +26,8 @@ export const recordLocation = async (shipmentId, locationData) => {
   const response = await client.post(`/api/v1/tracking/${shipmentId}/location`, locationData);
   return response.data;
 };
+
+export const getRoute = async (shipmentId) => {
+  const response = await client.get(`/api/v1/tracking/${shipmentId}/route`);
+  return response.data;
+};

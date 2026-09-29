@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import enum
 from typing import Optional, TYPE_CHECKING
-from sqlalchemy import String, Text, DateTime, ForeignKey, Enum as SQLEnum, func
+from sqlalchemy import String, Float, Text, DateTime, ForeignKey, Enum as SQLEnum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
@@ -40,6 +40,13 @@ class Shipment(Base):
 
     pickup_address: Mapped[str] = mapped_column(Text, nullable=False)
     delivery_address: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Geocoded coordinates for map display and route calculation
+    pickup_lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    pickup_lng: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    destination_lat: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    destination_lng: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
 
     estimated_delivery: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     actual_delivery: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)

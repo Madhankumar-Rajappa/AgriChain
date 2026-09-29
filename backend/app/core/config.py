@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     DATA_GOV_RESOURCE_ID: str = "9ef84268-d588-465a-a308-a864a43d0070"
     CROP_IMAGE_API_KEY: str = ""
 
+    # Geocoding & Routing Services for Live GPS Tracking
+    NOMINATIM_API_URL: str = "https://nominatim.openstreetmap.org/search"
+    OSRM_API_URL: str = "https://router.project-osrm.org"
+
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",

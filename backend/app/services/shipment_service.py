@@ -65,6 +65,25 @@ class ShipmentService:
 
         saved_shipment = self.repo.create_shipment(shipment)
 
+        # Geocode addresses in the background (non-blocking, best-effort)
+        try:
+            from app.services.geocoding_service import geocode_address_sync
+            pickup_coords = geocode_address_sync(shipment.pickup_address)
+            if pickup_coords:
+                saved_shipment.pickup_lat = pickup_coords[0]
+                saved_shipment.pickup_lng = pickup_coords[1]
+
+            delivery_coords = geocode_address_sync(order.delivery_address)
+            if delivery_coords:
+                saved_shipment.destination_lat = delivery_coords[0]
+                saved_shipment.destination_lng = delivery_coords[1]
+
+            if pickup_coords or delivery_coords:
+                self.repo.update_shipment(saved_shipment)
+        except Exception as e:
+            import logging
+            logging.getLogger("agrichain.shipment").warning(f"Geocoding during shipment creation failed (non-fatal): {e}")
+
         # Send notifications
         self.repo.create_notification(
             user_id=order.buyer_id,

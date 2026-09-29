@@ -33,6 +33,10 @@ class ShipmentOut(BaseModel):
     shipment_status: ShipmentStatus
     pickup_address: str
     delivery_address: str
+    pickup_lat: Optional[float] = None
+    pickup_lng: Optional[float] = None
+    destination_lat: Optional[float] = None
+    destination_lng: Optional[float] = None
     estimated_delivery: Optional[datetime] = None
     actual_delivery: Optional[datetime] = None
     tracking_notes: Optional[str] = None

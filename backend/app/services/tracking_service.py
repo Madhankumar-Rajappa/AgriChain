@@ -11,7 +11,7 @@ from app.models.user import User, UserRole
 from app.repositories.shipment_repository import ShipmentRepository
 from app.repositories.order_repository import OrderRepository
 from app.repositories.tracking_repository import TrackingRepository
-from app.schemas.tracking import LocationUpdate, LocationOut, TrackingSessionStatus, TrackingHistoryOut
+from app.schemas.tracking import LocationUpdate, LocationOut, TrackingSessionStatus, TrackingHistoryOut, RouteOut
 
 logger = logging.getLogger("agrichain.tracking")
 
@@ -268,4 +268,88 @@ class TrackingService:
             shipment_id=shipment_id,
             total_points=len(pts),
             points=[LocationOut.model_validate(p) for p in pts]
+        )
+
+    async def get_route(self, user: User, shipment_id: int) -> RouteOut:
+        """
+        Fetch real road route between shipment pickup and destination.
+        Uses geocoded coordinates on the shipment record, geocoding on-the-fly if needed.
+        Calls OSRM for actual road geometry.
+        Also calculates distance travelled/remaining if transporter has GPS data.
+        """
+        from app.services.geocoding_service import geocode_address
+        from app.services.routing_service import get_road_route, calculate_distance_along_route
+
+        shipment = self.verify_shipment_access(user, shipment_id)
+
+        # Get or geocode pickup coordinates
+        pickup_lat = shipment.pickup_lat
+        pickup_lng = shipment.pickup_lng
+        if not pickup_lat or not pickup_lng:
+            coords = await geocode_address(shipment.pickup_address)
+            if coords:
+                pickup_lat, pickup_lng = coords
+                shipment.pickup_lat = pickup_lat
+                shipment.pickup_lng = pickup_lng
+                self.db.commit()
+
+        # Get or geocode destination coordinates
+        dest_lat = shipment.destination_lat
+        dest_lng = shipment.destination_lng
+        if not dest_lat or not dest_lng:
+            coords = await geocode_address(shipment.delivery_address)
+            if coords:
+                dest_lat, dest_lng = coords
+                shipment.destination_lat = dest_lat
+                shipment.destination_lng = dest_lng
+                self.db.commit()
+
+        # Check if we have both sets of coordinates
+        if not pickup_lat or not pickup_lng:
+            return RouteOut(
+                shipment_id=shipment_id,
+                error=f"Could not geocode pickup address: {shipment.pickup_address}"
+            )
+
+        if not dest_lat or not dest_lng:
+            return RouteOut(
+                shipment_id=shipment_id,
+                pickup_coords=[pickup_lat, pickup_lng],
+                error=f"Could not geocode destination address: {shipment.delivery_address}"
+            )
+
+        # Get road route from OSRM
+        route_data = await get_road_route(pickup_lat, pickup_lng, dest_lat, dest_lng)
+
+        if not route_data:
+            return RouteOut(
+                shipment_id=shipment_id,
+                pickup_coords=[pickup_lat, pickup_lng],
+                destination_coords=[dest_lat, dest_lng],
+                error="Route calculation unavailable. Routing service did not return a valid route."
+            )
+
+        # Calculate distance progress if transporter has GPS data
+        distance_travelled = None
+        distance_remaining = None
+        latest_loc = self.tracking_repo.get_latest_location(shipment_id)
+        if latest_loc and route_data.get("geometry"):
+            progress = calculate_distance_along_route(
+                route_data["geometry"],
+                latest_loc.latitude,
+                latest_loc.longitude
+            )
+            if progress:
+                distance_travelled = progress["distance_travelled_km"]
+                distance_remaining = progress["distance_remaining_km"]
+
+        return RouteOut(
+            shipment_id=shipment_id,
+            pickup_coords=[pickup_lat, pickup_lng],
+            destination_coords=[dest_lat, dest_lng],
+            distance_km=route_data["distance_km"],
+            duration_minutes=route_data["duration_minutes"],
+            geometry=route_data["geometry"],
+            distance_travelled_km=distance_travelled,
+            distance_remaining_km=distance_remaining
         )

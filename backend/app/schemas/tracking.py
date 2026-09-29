@@ -40,3 +40,16 @@ class TrackingHistoryOut(BaseModel):
     shipment_id: int
     total_points: int
     points: List[LocationOut]
+
+
+class RouteOut(BaseModel):
+    """Response schema for real road route between pickup and destination."""
+    shipment_id: int
+    pickup_coords: Optional[List[float]] = None      # [lat, lng]
+    destination_coords: Optional[List[float]] = None  # [lat, lng]
+    distance_km: Optional[float] = None
+    duration_minutes: Optional[float] = None
+    geometry: Optional[List[List[float]]] = None      # [[lat, lng], ...]
+    distance_travelled_km: Optional[float] = None
+    distance_remaining_km: Optional[float] = None
+    error: Optional[str] = None
