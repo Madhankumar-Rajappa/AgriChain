@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: agrichain-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "1440"
+      - key: CORS_ORIGINS
+        value: '["http://localhost:5173", "https://agrichain-beige.vercel.app"]'
+      - key: DATABASE_URL
+        sync: false
+      - key: NOMINATIM_API_URL
+        value: "https://nominatim.openstreetmap.org/search"
+      - key: OSRM_API_URL
+        value: "https://router.project-osrm.org"

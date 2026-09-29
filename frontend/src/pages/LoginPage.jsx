@@ -176,20 +176,20 @@ export default function LoginPage() {
 
           {/* Quick Demo Fill Buttons */}
           <div className="mt-6 pt-5 border-t border-[#EBF2ED]">
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#66756B] flex items-center gap-1">
                 <Zap className="w-3.5 h-3.5 text-amber-500" /> Instant Demo Sign In
               </span>
               <span className="text-[10px] text-[#66756B]">Click to test role</span>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
               {demoAccounts.map((acc) => (
                 <button
                   key={acc.role}
                   type="button"
                   disabled={demoLoading !== null || submitting}
                   onClick={() => handleDemoFill(acc)}
-                  className="py-1.5 px-2 bg-[#F5F8F3] hover:bg-[#EAF5EC] hover:text-[#075B2A] text-[#123524] text-[11px] font-medium rounded-lg border border-[#DDE8DF] transition-all truncate"
+                  className="py-2 px-2.5 bg-[#F5F8F3] hover:bg-[#EAF5EC] hover:text-[#075B2A] text-[#123524] text-xs font-semibold rounded-xl border border-[#DDE8DF] hover:border-[#075B2A] transition-all text-center cursor-pointer shadow-2xs"
                   title={`Sign In as ${acc.role}`}
                 >
                   {demoLoading === acc.role ? '...' : acc.role}
