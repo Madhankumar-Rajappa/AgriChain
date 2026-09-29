@@ -70,13 +70,16 @@ class RoleChecker:
         self.allowed_roles = allowed_roles
 
     def __call__(self, current_user: User = Depends(get_current_active_user)) -> User:
+        user_role_str = current_user.role.value if hasattr(current_user.role, 'value') else str(current_user.role)
+        allowed_role_strs = [r.value if hasattr(r, 'value') else str(r) for r in self.allowed_roles]
+
         # ADMIN has global permission bypass
-        if current_user.role == UserRole.ADMIN or current_user.role in self.allowed_roles:
+        if user_role_str == "ADMIN" or current_user.role == UserRole.ADMIN or user_role_str in allowed_role_strs or current_user.role in self.allowed_roles:
             return current_user
         
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Operation not permitted. Required role: {[r.value for r in self.allowed_roles]}"
+            detail=f"Operation not permitted. Required role: {allowed_role_strs}"
         )
 
 

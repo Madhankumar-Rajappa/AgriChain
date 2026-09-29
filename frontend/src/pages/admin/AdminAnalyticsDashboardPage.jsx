@@ -59,11 +59,11 @@ const AdminAnalyticsDashboardPage = () => {
       <AppLayout title="Executive Analytics & Operations">
         <div className="max-w-md mx-auto my-12 p-8 bg-white border border-[#DDE8DF] rounded-3xl text-center shadow-soft">
           <AlertCircle className="w-12 h-12 text-rose-500 mx-auto mb-3" />
-          <h2 className="text-lg font-bold text-[#123524] mb-2">Access Denied / Error</h2>
-          <p className="text-xs text-[#66756B] mb-6">{error}</p>
+          <h2 className="text-lg font-bold text-[#123524] mb-2">Unable to Load Analytics</h2>
+          <p className="text-xs text-[#66756B] mb-6">{error || 'An unexpected error occurred while aggregating ecosystem telemetry.'}</p>
           <button
             onClick={loadAnalytics}
-            className="px-5 py-2.5 bg-[#075B2A] text-white font-bold text-xs rounded-xl shadow-soft"
+            className="px-5 py-2.5 bg-[#075B2A] hover:bg-[#064D25] text-white font-bold text-xs rounded-xl shadow-soft transition cursor-pointer"
           >
             Retry Analytics
           </button>

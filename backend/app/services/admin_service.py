@@ -33,11 +33,11 @@ class AdminService:
         # 1. User Stats
         users = self.db.scalars(select(User)).all()
         role_count = RoleCount(
-            farmer=sum(1 for u in users if u.role == UserRole.FARMER),
-            buyer=sum(1 for u in users if u.role == UserRole.BUYER),
-            transporter=sum(1 for u in users if u.role == UserRole.TRANSPORTER),
-            warehouse_manager=sum(1 for u in users if u.role == UserRole.WAREHOUSE_MANAGER),
-            admin=sum(1 for u in users if u.role == UserRole.ADMIN),
+            farmer=sum(1 for u in users if u.role in [UserRole.FARMER, "FARMER"]),
+            buyer=sum(1 for u in users if u.role in [UserRole.BUYER, "BUYER"]),
+            transporter=sum(1 for u in users if u.role in [UserRole.TRANSPORTER, "TRANSPORTER"]),
+            warehouse_manager=sum(1 for u in users if u.role in [UserRole.WAREHOUSE_MANAGER, "WAREHOUSE_MANAGER"]),
+            admin=sum(1 for u in users if u.role in [UserRole.ADMIN, "ADMIN"]),
             total=len(users)
         )
 
@@ -45,29 +45,30 @@ class AdminService:
         crops = self.db.scalars(select(Crop)).all()
         crop_stats = CropStats(
             total_crops=len(crops),
-            available_crops=sum(1 for c in crops if c.status == CropStatus.AVAILABLE),
-            reserved_crops=sum(1 for c in crops if c.status == CropStatus.RESERVED),
-            sold_crops=sum(1 for c in crops if c.status == CropStatus.SOLD)
+            available_crops=sum(1 for c in crops if c.status in [CropStatus.AVAILABLE, "AVAILABLE"]),
+            reserved_crops=sum(1 for c in crops if c.status in [CropStatus.RESERVED, "RESERVED"]),
+            sold_crops=sum(1 for c in crops if c.status in [CropStatus.SOLD, "SOLD"])
         )
 
         # 3. Order Stats
         orders = self.db.scalars(select(Order)).all()
         order_stats = OrderStats(
             total_orders=len(orders),
-            pending_orders=sum(1 for o in orders if o.status == OrderStatus.PENDING),
-            accepted_orders=sum(1 for o in orders if o.status == OrderStatus.ACCEPTED),
-            paid_orders=sum(1 for o in orders if o.status == OrderStatus.PAID),
-            in_transit_orders=sum(1 for o in orders if o.status == OrderStatus.IN_TRANSIT),
-            delivered_orders=sum(1 for o in orders if o.status in [OrderStatus.DELIVERED, OrderStatus.COMPLETED]),
-            cancelled_orders=sum(1 for o in orders if o.status in [OrderStatus.CANCELLED, OrderStatus.REJECTED])
+            pending_orders=sum(1 for o in orders if o.status in [OrderStatus.PENDING, "PENDING"]),
+            accepted_orders=sum(1 for o in orders if o.status in [OrderStatus.ACCEPTED, "ACCEPTED"]),
+            paid_orders=sum(1 for o in orders if o.status in [OrderStatus.PAID, "PAID"]),
+            in_transit_orders=sum(1 for o in orders if o.status in [OrderStatus.IN_TRANSIT, "IN_TRANSIT"]),
+            delivered_orders=sum(1 for o in orders if o.status in [OrderStatus.DELIVERED, OrderStatus.COMPLETED, "DELIVERED", "COMPLETED"]),
+            cancelled_orders=sum(1 for o in orders if o.status in [OrderStatus.CANCELLED, OrderStatus.REJECTED, "CANCELLED", "REJECTED"])
         )
 
         # 4. Financial Stats
         paid_statuses = [
             OrderStatus.PAID, OrderStatus.STORAGE_PENDING, OrderStatus.READY_FOR_PICKUP,
-            OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.COMPLETED
+            OrderStatus.IN_TRANSIT, OrderStatus.DELIVERED, OrderStatus.COMPLETED,
+            "PAID", "STORAGE_PENDING", "READY_FOR_PICKUP", "IN_TRANSIT", "DELIVERED", "COMPLETED"
         ]
-        total_rev = sum(o.total_amount for o in orders if o.status in paid_statuses)
+        total_rev = sum((o.total_amount or 0.0) for o in orders if o.status in paid_statuses)
         paid_order_count = sum(1 for o in orders if o.status in paid_statuses)
         avg_order_val = round(total_rev / paid_order_count, 2) if paid_order_count > 0 else 0.0
 
@@ -78,8 +79,8 @@ class AdminService:
 
         # 5. Warehouse Stats
         warehouses = self.db.scalars(select(Warehouse)).all()
-        total_cap = sum(w.total_capacity_tons for w in warehouses)
-        avail_cap = sum(w.available_capacity_tons for w in warehouses)
+        total_cap = sum((w.total_capacity_tons or 0.0) for w in warehouses)
+        avail_cap = sum((w.available_capacity_tons or 0.0) for w in warehouses)
         occ_cap = max(0.0, total_cap - avail_cap)
         occ_pct = round((occ_cap / total_cap * 100.0), 1) if total_cap > 0 else 0.0
 
@@ -95,9 +96,9 @@ class AdminService:
         shipments = self.db.scalars(select(Shipment)).all()
         shipment_stats = ShipmentStats(
             total_shipments=len(shipments),
-            assigned_shipments=sum(1 for s in shipments if s.shipment_status == ShipmentStatus.ASSIGNED),
-            in_transit_shipments=sum(1 for s in shipments if s.shipment_status in [ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT]),
-            delivered_shipments=sum(1 for s in shipments if s.shipment_status == ShipmentStatus.DELIVERED)
+            assigned_shipments=sum(1 for s in shipments if s.shipment_status in [ShipmentStatus.ASSIGNED, "ASSIGNED"]),
+            in_transit_shipments=sum(1 for s in shipments if s.shipment_status in [ShipmentStatus.PICKED_UP, ShipmentStatus.IN_TRANSIT, "PICKED_UP", "IN_TRANSIT"]),
+            delivered_shipments=sum(1 for s in shipments if s.shipment_status in [ShipmentStatus.DELIVERED, "DELIVERED"])
         )
 
         return AdminAnalyticsOut(
