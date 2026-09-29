@@ -17,5 +17,18 @@ export default defineConfig({
         secure: false,
       }
     }
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'map-vendor': ['leaflet', 'react-leaflet'],
+          'icons': ['lucide-react'],
+          'network': ['axios']
+        }
+      }
+    }
   }
 })
