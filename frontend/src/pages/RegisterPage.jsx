@@ -32,7 +32,13 @@ export default function RegisterPage() {
       await register(formData);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Registration failed. Please try again.');
+      if (err.response?.data?.detail) {
+        setError(typeof err.response.data.detail === 'string' ? err.response.data.detail : JSON.stringify(err.response.data.detail));
+      } else if (err.message === 'Network Error' || !err.response) {
+        setError('Network Error: Unable to reach backend API. If you are on Vercel, please ensure VITE_API_URL is configured in your Vercel settings.');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setSubmitting(false);
     }

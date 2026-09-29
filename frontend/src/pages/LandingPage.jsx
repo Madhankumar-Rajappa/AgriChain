@@ -69,7 +69,13 @@ export default function LandingPage() {
       navigate('/dashboard');
     } catch (err) {
       console.error("Demo login error:", err);
-      setDemoError(`Failed to log in as ${account.label}. Ensure database is seeded.`);
+      if (err.response?.data?.detail) {
+        setDemoError(typeof err.response.data.detail === 'string' ? err.response.data.detail : JSON.stringify(err.response.data.detail));
+      } else if (err.message === 'Network Error' || !err.response) {
+        setDemoError('Network Error: Cannot connect to backend server. Please verify your backend deployment on Render.');
+      } else {
+        setDemoError(`Failed to log in as ${account.label}.`);
+      }
     } finally {
       setLoggingInRole(null);
     }

@@ -30,7 +30,13 @@ export default function LoginPage() {
       await login(formData);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid email or password.');
+      if (err.response?.data?.detail) {
+        setError(typeof err.response.data.detail === 'string' ? err.response.data.detail : JSON.stringify(err.response.data.detail));
+      } else if (err.message === 'Network Error' || !err.response) {
+        setError('Network Error: Unable to reach backend API. Please check your backend connection and VITE_API_URL settings.');
+      } else {
+        setError('Invalid email or password.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -43,7 +49,13 @@ export default function LoginPage() {
       await login({ email: acc.email, password: acc.pass });
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.response?.data?.detail || `Failed to log in as ${acc.role}.`);
+      if (err.response?.data?.detail) {
+        setError(typeof err.response.data.detail === 'string' ? err.response.data.detail : JSON.stringify(err.response.data.detail));
+      } else if (err.message === 'Network Error' || !err.response) {
+        setError('Network Error: Unable to reach backend API. Please ensure your cloud backend is active and VITE_API_URL is set.');
+      } else {
+        setError(`Failed to log in as ${acc.role}.`);
+      }
     } finally {
       setDemoLoading(null);
     }
